@@ -20,21 +20,27 @@
 
 
 <ion-content>
-  <ion-list no-lines class="container">
+  <ion-list no-lines>
+    <form class="container" (ngSubmit)="submit()">
+        <ion-item>
+            <ion-input placeholder="Task description" clearInput
+            [(ngModel)]="model.description" name="description" required
+            #descriptionState="ngModel"></ion-input>
+          </ion-item>
 
-    <ion-item>
-      <ion-input placeholder="Task description" clearInput
-      [(ngModel)]="model.description"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label>Es importante</ion-label>
-      <ion-checkbox color="dark" [(ngModel)]="model.isImportant"></ion-checkbox>
-    </ion-item>
-
-    <div class="submit-button">
-      <button ion-button block (click)="submit()">Agregar</button>
-    </div>
-
+          <ion-item color="danger" [hidden]="descriptionState.valid || descriptionState.untouched">
+            Descripcion is requerida  
+          </ion-item>
+      
+          <ion-item>
+            <ion-label>Es importante</ion-label>
+            <ion-checkbox color="dark" [(ngModel)]="model.isImportant" name="isImportant"></ion-checkbox>
+          </ion-item>
+      
+          <div class="submit-button">
+            <button ion-button block type="submit"
+            [disabled]="!descriptionState.valid">Agregar</button>
+          </div>
+    </form>
   </ion-list>
 </ion-content>
