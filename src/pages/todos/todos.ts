@@ -1,5 +1,6 @@
+import { TodoModel } from './../../shared/todo-model';
+import { TodoServiceProvider } from './../../shared/todo-service';
 import { AddTaskModalPage } from '../add-task-modal/add-task-modal';
-import { TodoModel } from '../../shared/todo-model';
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ModalController } from 'ionic-angular';
 
@@ -13,36 +14,19 @@ import { IonicPage, NavController, NavParams, ModalController } from 'ionic-angu
 @IonicPage()
 @Component({
   selector: 'page-todos',
-  templateUrl: 'todos.html',
+  templateUrl: 'todos.html'  
 })
 export class TodosPage {
 
-  public todos: TodoModel[];
+  
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public modalCtrl:ModalController) {
-  }
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public modalCtrl:ModalController,
+    public todoServiceProvider : TodoServiceProvider) {}
 
-  ionViewDidLoad() {
-    this.todos = [
-      new TodoModel("This es my 1element"),
-      new TodoModel("This es my 2element"),
-      new TodoModel("This es my 3element"),
-      new TodoModel("This es my 4element", true),
-      new TodoModel("This es my 5element"),
-      new TodoModel("This es my 6element", true),
-      new TodoModel("This es my 7element", true),
-      new TodoModel("This es my 8element", false, true),
-      new TodoModel("This es my 9element", false, true),
-      new TodoModel("This es my 10element", false, true),
-      new TodoModel("This es my 11element", false),
-      new TodoModel("This es my 12element", false, true),
-      new TodoModel("This es my 13element", false, true),
-      new TodoModel("This es my 14element", false),
-      new TodoModel("This es my 15element", false, true),
-      new TodoModel("This es my 16element", true),
-      new TodoModel("This es my 17element", false, true)
-    ]
-  }
+  ionViewDidLoad() {}
 
     
   setTodoStyles(item:TodoModel){
@@ -55,19 +39,30 @@ export class TodosPage {
   }
 
   toogleTodo(todo:TodoModel){
-    todo.isDone = ! todo.isDone;
+    this.todoServiceProvider.toogleTodo(todo);
   }
 
-  addTodo(todo:TodoModel){
-    this.todos.push(todo);
+  removeTodo(todo:TodoModel){
+    this.todoServiceProvider.removeTodo(todo);
   }
 
+  showEditTodo(todo: TodoModel){
+    let modal = this.modalCtrl.create(AddTaskModalPage, {todo});
+    modal.present();
+
+    modal.onDidDismiss(data=>{
+      if(data){
+        this.todoServiceProvider.updateTodo(todo, data);
+
+      }
+    });
+  }
   showAddTodo(){
     let modal = this.modalCtrl.create(AddTaskModalPage);
     modal.present();
     modal.onDidDismiss(data=>{
       if(data){
-        this.addTodo(data);
+        this.todoServiceProvider.addTodo(data);
       }
     });
   }
