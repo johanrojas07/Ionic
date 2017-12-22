@@ -2,7 +2,7 @@ import { TodoModel } from './../../shared/todo-model';
 import { TodoServiceProvider } from './../../shared/todo-service';
 import { AddTaskModalPage } from '../add-task-modal/add-task-modal';
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ModalController } from 'ionic-angular';
+import { IonicPage, NavController, ModalController, Platform } from 'ionic-angular';
 
 /**
  * Generated class for the TodosPage page.
@@ -18,13 +18,14 @@ import { IonicPage, NavController, NavParams, ModalController } from 'ionic-angu
 })
 export class TodosPage {
 
+  private toogleTodoTimeout = null;
   
 
   constructor(
-    public navCtrl: NavController, 
-    public navParams: NavParams, 
-    public modalCtrl:ModalController,
-    public todoServiceProvider : TodoServiceProvider) {}
+    private navCtrl: NavController, 
+    private modalCtrl:ModalController,
+    private todoServiceProvider : TodoServiceProvider,
+    private platform : Platform ) {}
 
   ionViewDidLoad() {}
 
@@ -39,7 +40,13 @@ export class TodosPage {
   }
 
   toogleTodo(todo:TodoModel){
-    this.todoServiceProvider.toogleTodo(todo);
+    if(this.toogleTodoTimeout)
+      return;
+
+    this.toogleTodoTimeout = setTimeout(()=>{
+      this.todoServiceProvider.toogleTodo(todo);
+      this.toogleTodoTimeout = null;
+    },this.platform.is('ios') ? 0 : 300); 
   }
 
   removeTodo(todo:TodoModel){
