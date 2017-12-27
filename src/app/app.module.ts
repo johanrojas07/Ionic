@@ -12,11 +12,15 @@ import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { TodoServiceProvider } from '../shared/todo-service';
 import { PrioritizedTodosPiPePipe } from '../pipes/prioritized-todos-pi-pe/prioritized-todos-pi-pe';
+import { ListsPage } from '../pages/lists/lists';
+import { ListServiceProvider } from '../shared/list-service';
+
 
 @NgModule({
   declarations: [
     MyApp,
     TodosPage,
+    ListsPage,
     AddTaskModalPage,
     PrioritizedTodosPiPePipe,
     DoneTodosPipe
@@ -31,13 +35,15 @@ import { PrioritizedTodosPiPePipe } from '../pipes/prioritized-todos-pi-pe/prior
   entryComponents: [
     MyApp,
     TodosPage,
-    AddTaskModalPage
+    AddTaskModalPage,
+    ListsPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     TodoServiceProvider,
+    ListServiceProvider,
     
   ]
 })
