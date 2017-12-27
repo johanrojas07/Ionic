@@ -1,8 +1,9 @@
+import { ListModel } from './../../shared/list-model';
 import { TodoModel } from './../../shared/todo-model';
 import { TodoServiceProvider } from './../../shared/todo-service';
 import { AddTaskModalPage } from '../add-task-modal/add-task-modal';
 import { Component } from '@angular/core';
-import { IonicPage, NavController, ModalController, Platform } from 'ionic-angular';
+import { IonicPage, NavController, ModalController, Platform, NavParams} from 'ionic-angular';
 
 /**
  * Generated class for the TodosPage page.
@@ -19,15 +20,23 @@ import { IonicPage, NavController, ModalController, Platform } from 'ionic-angul
 export class TodosPage {
 
   private toogleTodoTimeout = null;
-  
+  private list:ListModel;  
 
   constructor(
     private navCtrl: NavController, 
     private modalCtrl:ModalController,
     private todoServiceProvider : TodoServiceProvider,
-    private platform : Platform ) {}
+    private platform : Platform,
+    private navParams :NavParams ) {
+      this.list = this.navParams.get('list');
+      this.todoServiceProvider.loadFromList(this.list.id);
+    }
 
   ionViewDidLoad() {}
+
+  ionViewWillUnload() {
+    this.todoServiceProvider.saveLocally(this.list.id);
+  }
 
     
   setTodoStyles(item:TodoModel){

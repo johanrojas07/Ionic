@@ -1,6 +1,7 @@
 import { TodoModel } from './todo-model';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Storage } from '@ionic/storage';
 
 
 /*
@@ -11,32 +12,38 @@ import { Injectable } from '@angular/core';
 */
 @Injectable()
 export class TodoServiceProvider {
-  private todos: TodoModel[];
+  private todos: TodoModel[] = [];
 
-  constructor(public http: HttpClient) {
-     this.getTodos();
+  constructor(public http: HttpClient,
+    public local :Storage) {
   }
 
-  getTodos(){
-    this.todos = [
-      new TodoModel("This es my 1element"),
-      new TodoModel("This es my 2element"),
-      new TodoModel("This es my 3element"),
-      new TodoModel("This es my 4element", true),
-      new TodoModel("This es my 5element"),
-      new TodoModel("This es my 6element", true),
-      new TodoModel("This es my 7element", true),
-      new TodoModel("This es my 8element", false, true),
-      new TodoModel("This es my 9element", false, true),
-      new TodoModel("This es my 10element", false, true),
-      new TodoModel("This es my 11element", false),
-      new TodoModel("This es my 12element", false, true),
-      new TodoModel("This es my 13element", false, true),
-      new TodoModel("This es my 14element", false),
-      new TodoModel("This es my 15element", false, true),
-      new TodoModel("This es my 16element", true),
-      new TodoModel("This es my 17element", false, true)
-    ];
+  public loadFromList(id:number){
+    this.getFromLocal(id);    
+  }
+
+  private getFromLocal(id:number){
+    return this.local.ready().then(()=>{
+      return this.local.get(`list/${id}`).then(
+        data => {
+          if (!data){
+            this.todos = [];
+            return;
+          }
+          let localTodos:TodoModel[] =[];
+          for(let todo of data){
+            localTodos.push(new TodoModel(todo.description,todo.isImportant, todo.isDone));
+          }
+          this.todos = localTodos;
+        }
+      )
+    })
+  }
+
+  public saveLocally(id:number){
+    this.local.ready().then(()=>{
+      this.local.set(`list/${id}`, this.todos);
+    })
   }
 
   addTodo(todo:TodoModel){

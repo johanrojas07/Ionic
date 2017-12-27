@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ListModel } from './list-model';
-
+import { Storage } from '@ionic/storage';
+import 'rxjs/add/operator/map';
+import { AppSettings } from './app-settings'
 
 /*
   Generated class for the ListServiceProvider provider.
@@ -14,25 +16,57 @@ export class ListServiceProvider {
 
   public lists:ListModel[] = [];
 
-  constructor(public http: HttpClient) {
+  constructor(public http: HttpClient, public local:Storage) {
     this.getLists();
   }
 
   private getLists(){
-    this.lists = [
-      new ListModel("My list #1", 0),
-      new ListModel("My list #2", 1),
-      new ListModel("My list #3", 2),
-      new ListModel("My list #4", 3),
-      new ListModel("My list #5", 4),
-      new ListModel("My list #6", 5),
-      new ListModel("My list #7", 6)
-    ];
+    this.getFromLocal()
+    .then(()=> {this.getFromServer()}, 
+          ()=> {this.getFromServer()});
   }
 
   public addList(name:string){
     let list = new ListModel(name, this.lists.length);
     this.lists = [...this.lists, list];
+    return list;
+  }
+
+  public getFromLocal(){     
+       return this.local.get('lists').then(
+        data => {
+          let localList:ListModel[]=[];
+          if(data){
+            data = JSON.parse(data);
+            for(let list of data){
+              localList.push(new ListModel(list.name, list.id));
+            }
+          }
+          this.lists = localList;
+        }
+          
+    );
+  } 
+
+  private getFromServer(){
+    this.http.get(`${AppSettings.API_ENDPOINT}/lists`)
+    .map(response => {return response.json()})
+    .map((lists:Object[]) =>{
+      return lists.map(item => ListModel.fromJson(item));
+    })
+    .subscribe(
+      (result:ListModel[]) =>{
+        this.lists = result;
+        this.saveLocally();
+      },
+      error => {
+        console.log("Error", error);
+      }
+    )
+  }
+
+  public saveLocally(){
+    this.local.set('lists', JSON.stringify(this.lists));
   }
 
 }
