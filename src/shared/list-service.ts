@@ -3,8 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { ListModel } from './list-model';
 import { Storage } from '@ionic/storage';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/share';
 import { AppSettings } from './app-settings'
 import { Observable } from 'rxjs/Rx';
+
+
+
 
 /*
   Generated class for the ListServiceProvider provider.
@@ -35,7 +39,7 @@ export class ListServiceProvider {
         this.lists = [...this.lists, list];
         this.saveLocally();
       },
-      error => console.log("Error trying to post a new list to the serve")
+      error => console.log("Errxor trying to post a new list to the serve")
     );
 
     return observable;
@@ -77,16 +81,37 @@ export class ListServiceProvider {
 
   private postNewListToServer(name): Observable<ListModel> {
     let observable = this.http.post(`${AppSettings.API_ENDPOINT}/lists`,{name})
+    .share()
     
-    // .map(response => response.json())
+    //.map(response => response.json())
     .map(list => ListModel.fromJson(list));
 
     observable.subscribe(()=>{}, ()=>{});
     return observable;
     
   }
+
+  private deleteListFromServer(id:number){
+    let observable = this.http.delete(`${AppSettings.API_ENDPOINT}/lists/${id}`)
+      //.map(response => response.json())
+      .share();
+
+      return observable;
+  }
+
   public saveLocally(){
     this.local.set('lists', JSON.stringify(this.lists));
+  }
+
+  public removeList(list:ListModel){
+    this.deleteListFromServer(list.id).subscribe(
+      ()=>{
+        let index = this.lists.indexOf(list);
+        this.lists = [...this.lists.slice(0,index), ...this.lists.slice(index+1)];
+        this.saveLocally();
+      },
+      (error) => {console.log(`an error ocurred while triying: ${list.name}`);}
+    )
   }
 
 }

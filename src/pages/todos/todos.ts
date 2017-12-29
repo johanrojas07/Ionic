@@ -3,7 +3,7 @@ import { TodoModel } from './../../shared/todo-model';
 import { TodoServiceProvider } from './../../shared/todo-service';
 import { AddTaskModalPage } from '../add-task-modal/add-task-modal';
 import { Component } from '@angular/core';
-import { IonicPage, NavController, ModalController, Platform, NavParams} from 'ionic-angular';
+import { IonicPage, ModalController, Platform, NavParams} from 'ionic-angular';
 
 /**
  * Generated class for the TodosPage page.
@@ -23,8 +23,7 @@ export class TodosPage {
   private list:ListModel;  
 
   constructor(
-    private navCtrl: NavController, 
-    private modalCtrl:ModalController,
+     private modalCtrl:ModalController,
     private todoServiceProvider : TodoServiceProvider,
     private platform : Platform,
     private navParams :NavParams ) {
@@ -74,7 +73,7 @@ export class TodosPage {
     });
   }
   showAddTodo(){
-    let modal = this.modalCtrl.create(AddTaskModalPage);
+    let modal = this.modalCtrl.create(AddTaskModalPage, {listId:this.list.id});
     modal.present();
     modal.onDidDismiss(data=>{
       if(data){

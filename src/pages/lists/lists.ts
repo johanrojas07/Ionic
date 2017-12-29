@@ -17,7 +17,11 @@ import { ListServiceProvider } from './../../shared/list-service';
   templateUrl: 'lists.html',
 
 })
+
+
 export class ListsPage {
+
+  public selectedList : ListModel = null;
 
   constructor(public navCtrl: NavController, public navParams: NavParams,
   public alertCtrl:AlertController,
@@ -31,6 +35,7 @@ public listsService:ListServiceProvider,
   }
 
   goToList(list:ListModel){
+    this.clearSelectList();
     this.navCtrl.push(TodosPage, {list});
   }
 
@@ -74,6 +79,23 @@ public listsService:ListServiceProvider,
 
     addListAlert.present();
 
+  }
+
+  clearSelectList(){
+    this.selectedList = null;
+  }
+
+  selectList(list:ListModel){
+    if(this.selectedList == list){
+      this.clearSelectList();
+    }else{
+      this.selectedList = list; 
+    }
+  }
+
+  removeSelectedList(){
+    this.listsService.removeList(this.selectedList);
+    this.selectedList=null;
   }
 
 }

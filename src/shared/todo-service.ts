@@ -2,7 +2,7 @@ import { TodoModel } from './todo-model';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-
+import { AppSettings } from './app-settings';
 
 /*
   Generated class for the TodoServiceProvider provider.
@@ -19,7 +19,9 @@ export class TodoServiceProvider {
   }
 
   public loadFromList(id:number){
-    this.getFromLocal(id);    
+    this.getFromLocal(id).then(()=>{
+      this.loadFromServer(id);
+    }) 
   }
 
   private getFromLocal(id:number){
@@ -32,12 +34,26 @@ export class TodoServiceProvider {
           }
           let localTodos:TodoModel[] =[];
           for(let todo of data){
-            localTodos.push(new TodoModel(todo.description,todo.isImportant, todo.isDone));
+            localTodos.push(TodoModel.clone(todo));
           }
           this.todos = localTodos;
         }
       )
     })
+  }
+
+  private loadFromServer(id:number){
+    this.http.get(`${AppSettings.API_ENDPOINT}/lists/${id}/todos`)
+    // .map(todos:Object[] => {
+    //   return todos.map(item => TodoModel.fromJson(item));
+    // } )
+    .subscribe(
+      (result:TodoModel[]) =>{
+        this.todos = result;
+        this.saveLocally(id);
+      },
+      error =>{ console.log("Error loading lists from serve"),error}
+    )
   }
 
   public saveLocally(id:number){
@@ -67,9 +83,9 @@ export class TodoServiceProvider {
 
   toogleTodo(todo:TodoModel){
   
-      let isDone = !todo.isDone;
       const todoIndex = this.todos.indexOf(todo);
-      let updateTodo = new TodoModel(todo.description, todo.isImportant, isDone);
+      let updateTodo = TodoModel.clone(todo);
+      updateTodo.isDone = ! todo.isDone;
       this.todos = [
         ...this.todos.slice(0, todoIndex),
         updateTodo,
