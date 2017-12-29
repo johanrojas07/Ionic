@@ -3,7 +3,8 @@ import { TodoModel } from './../../shared/todo-model';
 import { TodoServiceProvider } from './../../shared/todo-service';
 import { AddTaskModalPage } from '../add-task-modal/add-task-modal';
 import { Component } from '@angular/core';
-import { IonicPage, ModalController, Platform, NavParams} from 'ionic-angular';
+import { IonicPage, ModalController, Platform, NavParams, LoadingController} from 'ionic-angular';
+
 
 /**
  * Generated class for the TodosPage page.
@@ -26,7 +27,9 @@ export class TodosPage {
      private modalCtrl:ModalController,
     private todoServiceProvider : TodoServiceProvider,
     private platform : Platform,
-    private navParams :NavParams ) {
+    private navParams :NavParams,
+    private loadingCtrl : LoadingController
+  ) {
       this.list = this.navParams.get('list');
       this.todoServiceProvider.loadFromList(this.list.id);
     }
@@ -61,23 +64,38 @@ export class TodosPage {
     this.todoServiceProvider.removeTodo(todo);
   }
 
+  AddTodo(todo:TodoModel){
+    let loader = this.loadingCtrl.create();
+    loader.present();
+    this.todoServiceProvider.addTodo(todo)
+    .subscribe(()=> loader.dismiss(), ()=>loader.dismiss());
+  }
+
   showEditTodo(todo: TodoModel){
     let modal = this.modalCtrl.create(AddTaskModalPage, {todo});
     modal.present();
 
     modal.onDidDismiss(data=>{
       if(data){
-        this.todoServiceProvider.updateTodo(todo, data);
-
+        this.updateTodo(todo, data);
       }
     });
   }
+
+  updateTodo(originalTodo:TodoModel, modifiedTodo:TodoModel){
+    let loader = this.loadingCtrl.create();
+    loader.present();
+    this.todoServiceProvider.updateTodo(originalTodo, modifiedTodo)
+    .subscribe(()=>loader.dismiss(), ()=>loader.dismiss());    
+  }
+
   showAddTodo(){
     let modal = this.modalCtrl.create(AddTaskModalPage, {listId:this.list.id});
     modal.present();
+
     modal.onDidDismiss(data=>{
       if(data){
-        this.todoServiceProvider.addTodo(data);
+        this.AddTodo(data);
       }
     });
   }
